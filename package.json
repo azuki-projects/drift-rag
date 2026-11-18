@@ -1,0 +1,13 @@
+{
+  "name": "drift-rag",
+  "version": "1.0.0",
+  "description": "Online 2D multiplayer drifting game",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
+  }
+}
