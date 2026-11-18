@@ -3,39 +3,60 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>DRIFT RAG — Online Drift Arena</title>
+<title>DRIFT RAG — Police vs Drifters</title>
 <style>
-:root{color-scheme:dark;--lime:#b7ff4a;--panel:rgba(9,13,18,.82)}
+:root{color-scheme:dark;--lime:#b7ff4a;--panel:rgba(9,13,18,.86)}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111820;font-family:Inter,system-ui,Arial;color:#fff;touch-action:none}
 canvas{display:block;width:100%;height:100%;background:#18232a}
-#hud{position:fixed;inset:0;pointer-events:none}
-.panel{position:absolute;background:var(--panel);border:1px solid #ffffff20;border-radius:14px;padding:10px 13px;backdrop-filter:blur(8px);box-shadow:0 8px 30px #0005}
+#hud{position:fixed;inset:0;pointer-events:none}.panel{position:absolute;background:var(--panel);border:1px solid #ffffff20;border-radius:14px;padding:10px 13px;backdrop-filter:blur(8px);box-shadow:0 8px 30px #0005}
 #brand{top:14px;left:14px;font-weight:1000;letter-spacing:2px;color:var(--lime);font-size:17px}
 #stats{top:14px;right:14px;text-align:right;font-size:12px;line-height:1.6;color:#cbd5dc}
 #speed{font-size:27px;font-weight:900;color:white;line-height:1}
 #status{left:50%;top:14px;transform:translateX(-50%);font-size:12px;color:#c8d1d8;white-space:nowrap}
-#rename{pointer-events:auto;position:absolute;left:14px;top:72px;display:flex;gap:6px}
-input,button{border:1px solid #ffffff25;background:#101820;color:white;border-radius:9px;padding:9px;font:inherit}
-button{cursor:pointer}button:active{background:#33404a}
+#objective{left:14px;top:68px;font-size:12px;line-height:1.5;max-width:220px}
 #controls{position:absolute;inset:auto 0 18px;display:flex;justify-content:space-between;align-items:end;padding:0 18px;pointer-events:none}
-#steer{display:flex;gap:10px;pointer-events:auto}
-.pad{width:66px;height:66px;border-radius:50%;font-size:27px;font-weight:900;background:#101820cc;border:1px solid #ffffff50;touch-action:none}
-#pedals{display:flex;gap:10px;align-items:end;pointer-events:auto}
-.pedal{width:68px;height:76px;border-radius:18px;font-weight:900;font-size:12px;background:#101820d9;border:1px solid #ffffff50;touch-action:none}
-#gas{height:98px;background:#9ce83b30;border-color:#b7ff4a}
-#hand{height:60px;border-color:#ffad65}
+#steer{display:flex;gap:10px;pointer-events:auto}.pad{width:66px;height:66px;border-radius:50%;font-size:27px;font-weight:900;background:#101820dd;border:1px solid #ffffff50;touch-action:none}
+#pedals{display:flex;gap:9px;align-items:end;pointer-events:auto}
+.pedal{width:68px;height:76px;border-radius:18px;font-weight:900;font-size:12px;background:#101820e8;border:1px solid #ffffff50;touch-action:none}
+#gas{height:98px;background:#9ce83b30;border-color:#b7ff4a}#hand{height:60px;border-color:#ffad65}
 #hint{position:absolute;bottom:110px;left:50%;transform:translateX(-50%);font-size:11px;color:#d3dce2aa;text-align:center;white-space:nowrap}
-@media(min-width:800px){#controls{opacity:.75}.pad{width:58px;height:58px}.pedal{width:62px;height:68px}}
+button,input{border:1px solid #ffffff25;background:#101820;color:white;border-radius:10px;padding:11px;font:inherit}button{cursor:pointer}
+#joinScreen{position:fixed;z-index:5;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at center,#23343beF,#080d12f5)}
+#joinCard{width:min(420px,100%);padding:25px;border-radius:22px;background:#0d151dee;border:1px solid #ffffff25;box-shadow:0 24px 90px #000b}
+#joinCard h1{margin:0 0 5px;font-size:30px;letter-spacing:3px;color:var(--lime)}#joinCard p{margin:0 0 20px;color:#aab7bf;font-size:13px}
+#username{width:100%;margin:0 0 16px;padding:14px}
+.roleGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.role{padding:16px 10px;text-align:left;min-height:105px;background:#17232b;border:1px solid #ffffff26}
+.role strong{display:block;font-size:17px;margin-bottom:7px}.role span{font-size:11px;color:#aebbc2;line-height:1.4}
+#policeChoice strong{color:#64aaff}#drifterChoice strong{color:var(--lime)}
+#joinButton{width:100%;margin-top:14px;background:var(--lime);color:#111;font-weight:900;border:0;padding:14px}
+#joinError{color:#ff8585;font-size:12px;min-height:17px;margin-top:8px}
+#toast{position:fixed;z-index:4;left:50%;top:22%;transform:translate(-50%,-10px);opacity:0;transition:.25s;background:#080d12ed;border:1px solid #ffffff30;border-radius:14px;padding:13px 20px;text-align:center;font-weight:800;pointer-events:none}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:520px){#stats{top:70px}#status{top:14px}#objective{top:70px;max-width:155px;font-size:10px}.pad{width:58px;height:58px}.pedal{width:57px;height:69px;font-size:10px}#controls{padding:0 10px;gap:5px}#pedals{gap:5px}#hint{bottom:100px;font-size:9px}}
 </style>
 </head>
 <body>
 <canvas id="game"></canvas>
+<div id="joinScreen">
+ <div id="joinCard">
+  <h1>DRIFT/RAG</h1><p>Choose your identity and enter the chase arena.</p>
+  <input id="username" maxlength="16" autocomplete="nickname" placeholder="Enter your username">
+  <div class="roleGrid">
+   <button class="role" id="policeChoice" type="button"><strong>🚔 POLICE</strong><span>Chase down drifters and catch them by getting close.</span></button>
+   <button class="role" id="drifterChoice" type="button"><strong>🏎 DRIFTER</strong><span>Use speed, corners and handbrake drifts to escape.</span></button>
+  </div>
+  <button id="joinButton" type="button">ENTER THE ARENA</button>
+  <div id="joinError">Select a role to continue.</div>
+ </div>
+</div>
+<div id="toast"></div>
 <div id="hud">
  <div id="brand" class="panel">DRIFT<span style="color:white">/</span>RAG</div>
- <div id="status" class="panel">CONNECTING TO ARENA…</div>
+ <div id="status" class="panel">CONNECTING…</div>
+ <div id="objective" class="panel">Choose a role to start.</div>
  <div id="stats" class="panel"><div id="speed">0 <small style="font-size:11px">KM/H</small></div><div id="players">PLAYERS: 0</div><div id="drift">DRIFT: 0</div></div>
- <div id="rename"><input id="name" maxlength="16" placeholder="Your nickname"><button id="save">SET NAME</button></div>
- <div id="hint">WASD / ARROWS TO DRIVE · SPACE TO HANDBRAKE</div>
+ <div id="hint">WASD / ARROWS · SPACE HANDBRAKE</div>
  <div id="controls">
   <div id="steer"><button class="pad" data-control="left">‹</button><button class="pad" data-control="right">›</button></div>
   <div id="pedals"><button class="pedal" data-control="brake">BRAKE</button><button class="pedal" id="hand" data-control="handbrake">HANDBRAKE</button><button class="pedal" id="gas" data-control="gas">THROTTLE</button></div>
@@ -45,45 +66,55 @@ button{cursor:pointer}button:active{background:#33404a}
 <script>
 (() => {
  const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
- const socket=io(); let myId=null,arena={width:3200,height:2200},players=[],me=null;
- const input={steer:0,throttle:0,brake:0,handbrake:false};
- const keys={}; let camera={x:1600,y:1100},last=performance.now(),driftScore=0;
- const status=document.getElementById("status");
+ const socket=io();let myId=null,arena={width:3200,height:2200},players=[],me=null,chosenRole="";
+ const input={steer:0,throttle:0,brake:0,handbrake:false},keys={},held=new Set();
+ let camera={x:1600,y:1100},last=performance.now(),driftScore=0,joined=false;
+ const status=document.getElementById("status"),toast=document.getElementById("toast");
+ function notify(message){toast.textContent=message;toast.classList.add("show");clearTimeout(notify.timer);notify.timer=setTimeout(()=>toast.classList.remove("show"),2600)}
  function resize(){const d=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(innerWidth*d);canvas.height=Math.round(innerHeight*d);ctx.setTransform(d,0,0,d,0,0)}
  addEventListener("resize",resize);resize();
- socket.on("connect",()=>status.textContent="ONLINE · CONNECTED");
- socket.on("disconnect",()=>status.textContent="RECONNECTING…");
+ const savedName=localStorage.getItem("driftrag.username")||"";document.getElementById("username").value=savedName;
+ document.getElementById("policeChoice").onclick=()=>selectRole("police");
+ document.getElementById("drifterChoice").onclick=()=>selectRole("drifter");
+ function selectRole(role){chosenRole=role;document.querySelectorAll(".role").forEach(b=>b.style.outline="none");document.getElementById(role==="police"?"policeChoice":"drifterChoice").style.outline="2px solid "+(role==="police"?"#64aaff":"#b7ff4a");document.getElementById("joinError").textContent=role==="police"?"You will hunt the drifters.":"Escape the police and keep drifting."}
+ socket.on("connect",()=>{status.textContent="ONLINE · CONNECTED"});
+ socket.on("disconnect",()=>{status.textContent="RECONNECTING…"});
  socket.on("welcome",data=>{myId=data.id;arena=data.arena||arena});
- socket.on("state",list=>{players=list;me=list.find(p=>p.id===myId)||me;document.getElementById("players").textContent="PLAYERS: "+list.length});
- document.getElementById("save").onclick=()=>{const n=document.getElementById("name").value.trim();if(n)socket.emit("rename",n)};
- document.getElementById("name").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("save").click()});
+ socket.on("joined",()=>{joined=true;document.getElementById("joinScreen").style.display="none";document.getElementById("objective").textContent=chosenRole==="police"?"POLICE: Catch the drifters by getting close!":"DRIFTER: Keep moving and avoid police!";notify("You joined as "+chosenRole.toUpperCase())});
+ socket.on("state",list=>{players=list;me=list.find(p=>p.id===myId)||me;document.getElementById("players").textContent="PLAYERS: "+list.length+" · 🚔 "+list.filter(p=>p.role==="police").length+" / 🏎 "+list.filter(p=>p.role==="drifter").length});
+ socket.on("caught",data=>notify("CAUGHT by "+(data.by||"POLICE")+"! Respawning soon…"));
+ socket.on("catchSuccess",data=>notify("NICE CATCH! "+data.name+" was caught."));
+ socket.on("respawned",()=>notify("Back in the chase!"));
+ document.getElementById("joinButton").onclick=()=>{
+  const name=document.getElementById("username").value.trim().slice(0,16);
+  if(!name){document.getElementById("joinError").textContent="Please enter a username.";return}
+  if(!chosenRole){document.getElementById("joinError").textContent="Please choose Police or Drifter.";return}
+  localStorage.setItem("driftrag.username",name);
+  if(socket.connected)socket.emit("join",{name,role:chosenRole});
+  else document.getElementById("joinError").textContent="Connecting… try again in a moment.";
+ };
  addEventListener("keydown",e=>{keys[e.key.toLowerCase()]=true;if([" ","arrowup","arrowdown","arrowleft","arrowright"].includes(e.key.toLowerCase()))e.preventDefault()});
  addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
- const held=new Set();
+ document.querySelectorAll("[data-control]").forEach(el=>{
+  const c=el.dataset.control;
+  const down=e=>{e.preventDefault();held.add(c);try{el.setPointerCapture(e.pointerId)}catch(_){}};
+  const up=e=>{e.preventDefault();held.delete(c)};
+  el.addEventListener("pointerdown",down);el.addEventListener("pointerup",up);el.addEventListener("pointercancel",up);el.addEventListener("lostpointercapture",up);
+ });
  function updateInput(){
   input.steer=(keys.a||keys.arrowleft||held.has("left")?-1:0)+(keys.d||keys.arrowright||held.has("right")?1:0);
   input.throttle=keys.w||keys.arrowup||held.has("gas")?1:0;
   input.brake=keys.s||keys.arrowdown||held.has("brake")?1:0;
   input.handbrake=keys[" "]||held.has("handbrake");
-  socket.emit("input",input);
+  if(joined)socket.emit("input",input);
  }
- document.querySelectorAll("[data-control]").forEach(el=>{
-  const c=el.dataset.control;
-  const down=e=>{e.preventDefault();held.add(c);el.setPointerCapture?.(e.pointerId)};
-  const up=e=>{e.preventDefault();held.delete(c)};
-  el.addEventListener("pointerdown",down);el.addEventListener("pointerup",up);
-  el.addEventListener("pointercancel",up);el.addEventListener("lostpointercapture",up);
- });
  function roundedRect(x,y,w,h,r,fill,stroke){ctx.beginPath();ctx.roundRect(x,y,w,h,r);if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke()}}
  function drawWorld(){
   ctx.fillStyle="#18232a";ctx.fillRect(0,0,innerWidth,innerHeight);
-  const ox=innerWidth/2-camera.x,oy=innerHeight/2-camera.y;
-  ctx.save();ctx.translate(ox,oy);
-  ctx.fillStyle="#26343a";ctx.fillRect(0,0,arena.width,arena.height);
-  ctx.strokeStyle="#35464b";ctx.lineWidth=2;
+  const ox=innerWidth/2-camera.x,oy=innerHeight/2-camera.y;ctx.save();ctx.translate(ox,oy);
+  ctx.fillStyle="#26343a";ctx.fillRect(0,0,arena.width,arena.height);ctx.strokeStyle="#35464b";ctx.lineWidth=2;
   for(let x=0;x<=arena.width;x+=100){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,arena.height);ctx.stroke()}
   for(let y=0;y<=arena.height;y+=100){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(arena.width,y);ctx.stroke()}
-  // skid-friendly practice circuit
   ctx.strokeStyle="#11191d";ctx.lineWidth=390;ctx.beginPath();ctx.ellipse(1600,1100,1050,700,0,0,Math.PI*2);ctx.stroke();
   ctx.strokeStyle="#d6d0a0";ctx.lineWidth=3;ctx.setLineDash([22,20]);ctx.beginPath();ctx.ellipse(1600,1100,1050,700,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
   ctx.strokeStyle="#e4e8d4";ctx.lineWidth=7;ctx.strokeRect(8,8,arena.width-16,arena.height-16);
@@ -92,26 +123,24 @@ button{cursor:pointer}button:active{background:#33404a}
  }
  function drawCar(p){
   ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.angle);
-  // shadow and body
-  roundedRect(-25,-14,54,32,8,"#0007");
-  roundedRect(-27,-13,54,26,7,p.color||"#55c8ff","#ffffffaa");
-  roundedRect(-8,-10,20,20,4,"#192a35");
-  ctx.fillStyle="#d9f2ff";ctx.fillRect(13,-9,7,6);ctx.fillRect(13,3,7,6);
-  ctx.fillStyle="#ff5a48";ctx.fillRect(-26,-9,4,6);ctx.fillRect(-26,3,4,6);
+  roundedRect(-29,-16,60,36,9,"#0008");
+  roundedRect(-28,-14,56,28,7,p.caught?"#777":p.color||"#55c8ff","#ffffffaa");
+  roundedRect(-8,-11,23,22,4,"#192a35");
+  ctx.fillStyle="#d9f2ff";ctx.fillRect(16,-10,6,7);ctx.fillRect(16,3,6,7);
+  ctx.fillStyle="#ff5a48";ctx.fillRect(-27,-10,5,7);ctx.fillRect(-27,3,5,7);
+  if(p.role==="police"){ctx.fillStyle="#f4f7ff";ctx.fillRect(-5,-14,12,4);ctx.fillStyle="#ff4040";ctx.fillRect(-5,-18,6,4);ctx.fillStyle="#388dff";ctx.fillRect(1,-18,6,4)}
   ctx.restore();
-  ctx.save();ctx.font="bold 12px system-ui";ctx.textAlign="center";ctx.fillStyle="#fff";ctx.shadowColor="#000";ctx.shadowBlur=5;ctx.fillText(p.name||"Driver",p.x,p.y-28);ctx.restore();
+  ctx.save();ctx.font="bold 12px system-ui";ctx.textAlign="center";ctx.fillStyle=p.role==="police"?"#83baff":"#fff";ctx.shadowColor="#000";ctx.shadowBlur=5;ctx.fillText((p.role==="police"?"🚔 ":"🏎 ")+(p.name||"Driver")+(p.caught?" · CAUGHT":""),p.x,p.y-31);ctx.restore();
  }
  function frame(now){
   const dt=Math.min((now-last)/1000,.05);last=now;updateInput();
   if(me){
-   const targetX=me.x-me.vx*0.16,targetY=me.y-me.vy*0.16;
-   const smooth=1-Math.pow(.001,dt);
+   const targetX=me.x-me.vx*.16,targetY=me.y-me.vy*.16,smooth=1-Math.pow(.001,dt);
    camera.x+=(targetX-camera.x)*smooth;camera.y+=(targetY-camera.y)*smooth;
    const speed=Math.hypot(me.vx,me.vy);
    document.getElementById("speed").innerHTML=Math.round(speed*.19)+' <small style="font-size:11px">KM/H</small>';
    const slip=Math.abs(me.vx*(-Math.sin(me.angle))+me.vy*Math.cos(me.angle));
-   if(input.handbrake&&speed>70&&slip>20)driftScore+=slip*dt;
-   else driftScore=Math.max(0,driftScore-18*dt);
+   if(input.handbrake&&speed>70&&slip>20)driftScore+=slip*dt;else driftScore=Math.max(0,driftScore-18*dt);
    document.getElementById("drift").textContent="DRIFT: "+Math.floor(driftScore);
   }
   drawWorld();requestAnimationFrame(frame);
